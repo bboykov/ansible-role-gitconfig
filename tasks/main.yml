@@ -1,0 +1,39 @@
+---
+- name: Check if Git is installed.
+  shell: |
+    hash git 2>/dev/null ;echo $?
+  register: _is_git_installed
+  changed_when: false
+
+- name: Install Git.
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ gitconfig_packages }}"
+  when: _is_git_installed.stdout == "1"
+  become: true
+
+- name: Configure gitconfig file.
+  template:
+    src: gitconfig.j2
+    dest: "~{{ gitconfig_user }}/.gitconfig"
+    owner: "{{ gitconfig_user }}"
+    group: "{{ gitconfig_user }}"
+    validate: git config -f %s --list
+  when: gitconfig_set
+
+- name: Configure gitignore file.
+  template:
+    src: gitignore.j2
+    dest: "~{{ gitconfig_user }}/{{ gitconfig.core.excludesfile | basename }}"
+    owner: "{{ gitconfig_user }}"
+    group: "{{ gitconfig_user }}"
+  when: gitconfig_set_ignore
+
+- name: Configure Git commit message template.
+  template:
+    src: gitmessage.j2
+    dest: "~{{ gitconfig_user }}/{{ gitconfig.commit.template | basename }}"
+    owner: "{{ gitconfig_user }}"
+    group: "{{ gitconfig_user }}"
+  when: gitconfig_set_commit_message
