@@ -1,16 +1,9 @@
 ---
-- name: Check if Git is installed.
-  shell: |
-    hash git 2>/dev/null ;echo $?
-  register: _is_git_installed
-  changed_when: false
-
-- name: Install Git.
+- name: Install Git packages.
   package:
     name: "{{ item }}"
     state: present
   with_items: "{{ gitconfig_packages }}"
-  when: _is_git_installed.stdout == "1"
   become: true
 
 - name: Configure gitconfig file.
