@@ -1,8 +1,14 @@
 ---
+- name: Add ppa:git-core/ppa to install latest git
+  apt_repository:
+    repo: 'ppa:git-core/ppa'
+    state: present
+  become: true
+
 - name: Install Git packages.
   package:
     name: "{{ item }}"
-    state: present
+    state: latest
   with_items: "{{ gitconfig_packages }}"
   become: true
 
